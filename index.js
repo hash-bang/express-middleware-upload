@@ -1,7 +1,7 @@
 /**
 * Middleware factory to deal with file CRUD (listings, uploads, reads and deletes)
 * @param {Object} options Options to use when generating the middleware
-* @param {string} options.path The path (relative to emu.defaults.basePath) to store files in. Prefix slash is optional but recommended for readability
+* @param {string|function} options.path The path (relative to emu.defaults.basePath) to store files in. Prefix slash is optional but recommended for readability
 * @param {string} [options.basePath] Prefix automatically prepended onto options.path (this is seperate so it can be set globally to your application root via `emu.defaults.basePath`)
 * @param {function} [options.errorHandler] How to output errors. This should be a function called as (req, res, statusCode, message)
 * @param {string} [options.postPath='upload'] How to name the uploaded file. 'upload' = Use the uploaded filename appended to options.path, 'param' = Use the path specified in `req.params.path` (implies `options.limit=1`), 'dir' = Use the path as the directory to store the file in and the filename from the uploaded filename
@@ -79,33 +79,54 @@ var emu = function(options) {
 	var settings = _.defaults(options, emu.defaults);
 
 	if (!settings.path) throw new Error('Cannot use emu without specifying a storage path');
-	settings.path = fspath.normalize(fspath.join(emu.defaults.basePath, settings.path)); // Neaten up the settings path so its absolute
+	if (_.isString(settings.path)) settings.path = fspath.normalize(fspath.join(emu.defaults.basePath, settings.path)); // Neaten up the settings path so its absolute
 
 	return function(req, res, next) {
-		if (req.method == 'GET' && req.params.path) {
-			runMiddleware(req, res, settings.get, function() {
-				emu.get(settings, req, res);
-			});
-		} else if (req.method == 'GET') {
-			runMiddleware(req, res, settings.list, function() {
-				emu.list(settings, req, res);
-			});
-		} else if (req.method == 'POST') {
-			runMiddleware(req, res, settings.post, function() {
-				emu.post(settings, req, res);
-			});
-		} else if (req.method == 'DELETE') {
-			if (!req.params.path) settings.errorHandler(req, res, 400, 'No file path specified');
-			runMiddleware(req, res, settings.delete, function() {
-				emu.delete(settings, req, res);
-			});
-		}
+		async()
+			// Compute the path if its a function and return a shallow clone of settings with the mutated path
+			.then('settings', function(next) {
+				if (_.isString(settings.path)) { // Don't need to do anything for static paths
+					return next(null, settings);
+				} else if (_.isFunction(settings.path)) { // Run async function and wait for response
+					settings.path(req, res, function(err, computedPath) {
+						next(null, _.chain(settings) // Clone settings (so we don't damage the original) and mutate path to the returned value
+							.clone()
+							.set('path', computedPath)
+							.value()
+						);
+					});
+				} else {
+					throw new Error ('express-middleware-upload setting `path` must be a string or a function');
+				}
+			})
+			// }}}
+			.then(function(next) {
+				console.log('USE SET', this.settings);
+				next();
+			})
+			// Call the correct handler based on the incomming method / parameters {{{
+			.then(function(next) {
+				if (req.method == 'GET' && req.params.path) {
+					runMiddleware(req, res, this.settings.get, ()=> emu.get(this.settings, req, res));
+				} else if (req.method == 'GET') {
+					runMiddleware(req, res, this.settings.list, ()=> emu.list(this.settings, req, res));
+				} else if (req.method == 'POST') {
+					runMiddleware(req, res, this.settings.post, ()=> emu.post(this.settings, req, res));
+				} else if (req.method == 'DELETE') {
+					if (!req.params.path) this.settings.errorHandler(req, res, 400, 'No file path specified');
+					runMiddleware(req, res, this.settings.delete, ()=> emu.delete(this.settings, req, res));
+				}
+				next(); // Drop immediately though to the end so we can release the async object from memory
+			})
+			.end();
+			// }}}
 	};
 };
 
 
 /**
 * Default settings for EMU
+* The contents of this object get merged with every EMU factory call
 * @var {Object}
 */
 emu.defaults = {

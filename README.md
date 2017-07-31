@@ -38,7 +38,7 @@ The following table lists the valid configuration options. The only mandatory se
 
 | Option         | Type                      | Default    | Description |
 |----------------|---------------------------|--------------------------|
-| `path`         | String                    |            | Mandatory path of where to store uploaded files |
+| `path`         | String or Function        |            | Mandatory path of where to store uploaded files. If this is a function it is called as `func(req, res, next)` and is expected to fire the callback as `func(err, computedPath)` |
 | `basePath`     | String                    |            | Prefix automatically prepended onto options.path (this is separate so it can be set globally to your application root via `emu.defaults.basePath`) |
 | `errorHandler` | Function                  |            | How to output errors. This should be a function called as (req, res, statusCode, message)
 | `postPath`     | String                    | `'upload'` | How to name the uploaded file. `'upload'` = Use the uploaded filename appended to options.path, `'param'` = Use the path specified in `req.params.path` (implies `options.limit=1`), `'dir'` = Use the path as the directory to store the file in and the filename from the uploaded filename |

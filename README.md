@@ -36,18 +36,18 @@ app.use('/api/files/:path?', emu(configOptions));
 
 The following table lists the valid configuration options. The only mandatory setting is `path` all others are optional.
 
-| Option         | Type                      | Default    | Description |
-|----------------|---------------------------|--------------------------|
-| `path`         | String or Function        |            | Mandatory path of where to store uploaded files. If this is a function it is called as `func(req, res, next)` and is expected to fire the callback as `func(err, computedPath)` |
-| `basePath`     | String                    |            | Prefix automatically prepended onto options.path (this is separate so it can be set globally to your application root via `emu.defaults.basePath`) |
-| `errorHandler` | Function                  |            | How to output errors. This should be a function called as (req, res, statusCode, message)
-| `postPath`     | String                    | `'upload'` | How to name the uploaded file. `'upload'` = Use the uploaded filename appended to options.path, `'param'` = Use the path specified in `req.params.path` (implies `options.limit=1`), `'dir'` = Use the path as the directory to store the file in and the filename from the uploaded filename |
-| `field`        | String                    | `'file'`   | What the multi-part field name is (if falsy, all fields will be accepted - this is not recommended) |
-| `limit`        | Number                    | `0`        | The maximum number of files to accept, set to 0 for no limit |
-| `list`         | Function, Array, String, Boolean |         | Middleware(s) to run before listing files at a given path. See below for comments. |
-| `get`          | Function, Array, String, Boolean |         | Middleware(s) to run before reading a specific file. See below for comments. |
-| `post`         | Function, Array, String, Boolean |         | Middleware(s) to run before accepting an file upload. See below for comments. |
-| `delete`       | Function, Array, String, Boolean | `false` | Middleware(s) to run before deleting a file. See below for comments. |
+| Option         | Type                                       | Default    | Description |
+|----------------|--------------------------------------------|------------|-------------|
+| `path`         | String or Function                         |            | Mandatory path of where to store uploaded files. If this is a function it is called as `func(req, res, next)` and is expected to fire the callback as `func(err, computedPath)` |
+| `basePath`     | String                                     |            | Prefix automatically prepended onto options.path (this is separate so it can be set globally to your application root via `emu.defaults.basePath`) |
+| `errorHandler` | Function                                   |            | How to output errors. This should be a function called as (req, res, statusCode, message) |
+| `postPath`     | String                                     | `'upload'` | How to name the uploaded file. `'upload'` = Use the uploaded filename appended to options.path, `'param'` = Use the path specified in `req.params.path` (implies `options.limit=1`), `'dir'` = Use the path as the directory to store the file in and the filename from the uploaded filename |
+| `field`        | String                                     | `'file'`   | What the multi-part field name is (if falsy, all fields will be accepted - this is not recommended) |
+| `limit`        | Number                                     | `0`        | The maximum number of files to accept, set to 0 for no limit |
+| `list`         | Function, Array, String, Boolean           |            | Middleware(s) to run before listing files at a given path. See below for comments. |
+| `get`          | Function, Array, String, Boolean           |            | Middleware(s) to run before reading a specific file. See below for comments. |
+| `post`         | Function, Array, String, Boolean           |            | Middleware(s) to run before accepting an file upload. See below for comments. |
+| `delete`       | Function, Array, String, Boolean           | `false`    | Middleware(s) to run before deleting a file. See below for comments. |
 
 
 Middleware

@@ -7,10 +7,10 @@
 * @param {string} [options.postPath='upload'] How to name the uploaded file. 'upload' = Use the uploaded filename appended to options.path, 'param' = Use the path specified in `req.params.path` (implies `options.limit=1`), 'dir' = Use the path as the directory to store the file in and the filename from the uploaded filename
 * @param {string} [options.field='file'] What the multi-part field name is (if omitted all fields will be accepted)
 * @param {number} [options.limit=0] The maximum number of files to accept, set to 0 to accept all
-* @param {function|array|string} [options.list] Middleware(s) to run before listing files at a given path
-* @param {function|array|string} [options.get] Middleware(s) to run before reading a specific file
-* @param {function|array|string} [options.post] Middleware(s) to run before accepting an file upload
-* @param {function|array|string} [options.delete] Middleware(s) to run before deleteing a file
+* @param {function|array|string|boolean} [options.list] Middleware(s) to run before listing files at a given path
+* @param {function|array|string|boolean} [options.get] Middleware(s) to run before reading a specific file
+* @param {function|array|string|boolean} [options.post] Middleware(s) to run before accepting an file upload
+* @param {function|array|string|boolean} [options.delete] Middleware(s) to run before deleteing a file
 *
 * @example
 * // In an Express controller:

@@ -48,6 +48,7 @@ The following table lists the valid configuration options. The only mandatory se
 | `get`          | Function, Array, String, Boolean           |            | Middleware(s) to run before reading a specific file. See below for comments. |
 | `post`         | Function, Array, String, Boolean           |            | Middleware(s) to run before accepting an file upload. See below for comments. |
 | `delete`       | Function, Array, String, Boolean           | `false`    | Middleware(s) to run before deleting a file. See below for comments. |
+| `postProcess`  | Function, Array                            |            | Middleware(s) to run after accepting a file upload, this can override the output by calling `res.send()` manually. `req.files` will also have an `storagePath` property which will indicate where on disk the file was saved by EMU |
 
 
 Middleware

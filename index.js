@@ -11,6 +11,7 @@
 * @param {function|array|string|boolean} [options.get] Middleware(s) to run before reading a specific file
 * @param {function|array|string|boolean} [options.post] Middleware(s) to run before accepting an file upload
 * @param {function|array|string|boolean} [options.delete] Middleware(s) to run before deleteing a file
+* @param {function|array} [options.postProcessing] Middleware(s) to run after a file has been accepted (req.files is decorated with additional properites `storagePath` for where the file is stored if a path was computed)
 *
 * @example
 * // In an Express controller:
@@ -39,7 +40,9 @@ var multer = require('multer');
 *	- An array of functions(req, res, next) - Functions will be called in sequence, all functions must call the next method
 *	- A string - If specified (and `obj` is also specified) the middleware to use will be looked up as a key of the object. This is useful if you need to invoke similar methods on different entry points
 *
-* @param {null|function|array} middleware The optional middleware to run this can be a function, an array of functions or a string
+* @param {Object} req The original request object
+* @param {Object} res The original response object
+* @param {null|function|array} middleware The optional middleware to run
 * @param {function} callback The callback to invoke when completed. This may not be called
 * @param {object} obj The parent object to look up inherited functions from (if middleware is a string)
 */
@@ -300,12 +303,19 @@ emu.post = function(settings, req, res) {
 				// }}}
 				// Write the file {{{
 				.then(function(next) {
+					file.storagePath = this.filePath;
 					fs.writeFile(this.filePath, file.buffer, next);
 				})
 				// }}}
 				// End {{{
 				.end(nextFile)
 				// }}}
+		})
+		// }}}
+		// Call post processing behaviour {{{
+		.then(function(next) {
+			if (!settings.postProcessing || (_.isArray(settings.postProcessing) && !settings.postProcessing.length)) return next(); // Skip if no middleware
+			runMiddleware(req, res, settings.postProcessing, next);
 		})
 		// }}}
 		// End {{{

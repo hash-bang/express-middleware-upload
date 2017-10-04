@@ -34,7 +34,7 @@ The base usage of 'EMU' is to attach it to an Express end-point and give it a co
 app.use('/api/files/:path?', emu(configOptions));
 ```
 
-The following table lists the valid configuration options. The only mandatory setting is `path` all others are optional.
+The following table lists the valid configuration options. The only mandatory setting is `path`, all other settings are optional.
 
 | Option         | Type                                       | Default    | Description |
 |----------------|--------------------------------------------|------------|-------------|

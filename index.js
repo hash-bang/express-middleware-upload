@@ -100,10 +100,6 @@ var emu = function(options) {
 				}
 			})
 			// }}}
-			.then(function(next) {
-				console.log('USE SET', this.settings);
-				next();
-			})
 			// Call the correct handler based on the incomming method / parameters {{{
 			.then(function(next) {
 				if (req.method == 'GET' && req.params.path) {

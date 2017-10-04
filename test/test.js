@@ -31,6 +31,8 @@ describe('express-middleware-upload (static options.path)', ()=> {
 		});
 	});
 
+	after(()=> server.close());
+
 	it('should accept a file upload', done => {
 		superagent.post(url + '/api/files')
 			.attach('file', __dirname + '/data/jabberwocky.txt')
@@ -95,7 +97,7 @@ describe('express-middleware-upload (static options.path)', ()=> {
 });
 
 
-describe.only('express-middleware-upload (dynamic options.path)', ()=> {
+describe('express-middleware-upload (dynamic options.path)', ()=> {
 
 	before('setup server', done => {
 		app.use(expressLogger);
@@ -114,6 +116,8 @@ describe.only('express-middleware-upload (dynamic options.path)', ()=> {
 			done();
 		});
 	});
+
+	after(()=> server.close());
 
 	it('should accept a file upload', done => {
 		superagent.post(url + '/api/assets/123')

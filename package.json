@@ -1,6 +1,6 @@
 {
   "name": "express-middleware-upload",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Express middleware to assist with file upload CRUD (uploads, listing, reading and deletion)",
   "main": "index.js",
   "scripts": {

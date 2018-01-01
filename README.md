@@ -16,12 +16,13 @@ app.use('/api/files/:path?', emu({
 By default "EMU" will expose an unloader at the specified end-point as well as the ability to list, read and delete files.
 In the above example the following URL methods will upload, list, read and delete files:
 
-| Method   | URL                  | Payload           | Description                                 |
-|----------|----------------------|-------------------|---------------------------------------------|
-| `POST`   | `/api/files`         | Multipart file(s) | Upload a file / files to the API end-point  |
-| `GET`    | `/api/files`         |                   | List all uploads at the end-point           |
-| `GET`    | `/api/file/FILENAME` |                   | Read a specific filename at the end-point   |
-| `DELETE` | `/api/file/FILENAME` |                   | Delete a specific filename at the end-point |
+| Method   | URL                  | Payload / Headers     | Description                                 |
+|----------|----------------------|-----------------------|---------------------------------------------|
+| `POST`   | `/api/files`         | Multipart file(s)     | Upload a file / files to the API end-point  |
+| `GET`    | `/api/files`         |                       | List all uploads at the end-point           |
+| `GET`    | `/api/file/FILENAME` |                       | Read a specific filename at the end-point   |
+| `DELETE` | `/api/file/FILENAME` |                       | Delete a specific filename at the end-point |
+| `MOVE`   | `/api/file/FILENAME` | `headers.destination` | Rename a file                               |
 
 
 
@@ -48,6 +49,7 @@ The following table lists the valid configuration options. The only mandatory se
 | `get`          | Function, Array, String, Boolean           |            | Middleware(s) to run before reading a specific file. See below for comments. |
 | `post`         | Function, Array, String, Boolean           |            | Middleware(s) to run before accepting an file upload. See below for comments. |
 | `delete`       | Function, Array, String, Boolean           | `false`    | Middleware(s) to run before deleting a file. See below for comments. |
+| `move`         | Function, Array, String, Boolean           | `false`    | Middleware(s) to run before allowing a file to be renamed. See below for comments. |
 | `postProcess`  | Function, Array                            |            | Middleware(s) to run after accepting a file upload, this can override the output by calling `res.send()` manually. `req.files` will also have an `storagePath` property which will indicate where on disk the file was saved by EMU |
 
 
@@ -69,5 +71,6 @@ app.use('/api/files/:path?', emu({
 	list: 'post', // Copy the same middleware from 'post'
 	get: 'post', 
 	delete: false, // Forbid all deletes
+	move: false, // Forbid all renames
 });
 ```

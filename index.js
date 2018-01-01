@@ -10,6 +10,7 @@
 * @param {function|array|string|boolean} [options.list] Middleware(s) to run before listing files at a given path
 * @param {function|array|string|boolean} [options.get] Middleware(s) to run before reading a specific file
 * @param {function|array|string|boolean} [options.post] Middleware(s) to run before accepting an file upload
+* @param {function|array|string|boolean} [options.move] Middleware(s) to run before accept a file move command
 * @param {function|array|string|boolean} [options.delete] Middleware(s) to run before deleteing a file
 * @param {function|array} [options.postProcessing] Middleware(s) to run after a file has been accepted (req.files is decorated with additional properites `storagePath` for where the file is stored if a path was computed)
 *
@@ -111,6 +112,8 @@ var emu = function(options) {
 					runMiddleware(req, res, this.settings.list, ()=> emu.list(this.settings, req, res));
 				} else if (req.method == 'POST') {
 					runMiddleware(req, res, this.settings.post, ()=> emu.post(this.settings, req, res));
+				} else if (req.method == 'MOVE') {
+					runMiddleware(req, res, this.settings.post, ()=> emu.move(this.settings, req, res));
 				} else if (req.method == 'DELETE') {
 					if (!req.params.path) this.settings.errorHandler(req, res, 400, 'No file path specified');
 					runMiddleware(req, res, this.settings.delete, ()=> emu.delete(this.settings, req, res));
@@ -353,5 +356,40 @@ emu.delete = function(settings, req, res) {
 		})
 		// }}}
 };
+
+
+/**
+* Move / rename a file
+* This is the child middleware call of emu
+* @see emu
+* @param {Object} options An options object using the same standard as the parent middleware
+* @param {string} options.path The storage path to use
+*/
+emu.move = function(settings, req, res) {
+	async()
+		// Sanity checks {{{
+		.then(function(next) {
+			if (!req.headers.destination) return next('Destination header not specified');
+			next();
+		})
+		// }}}
+		// Calculate path {{{
+		.then('path', function(next) {
+			next(null, fspath.normalize(`${settings.path}/${req.params.path}`));
+		})
+		// }}}
+		// Move {{{
+		.then(function(next) {
+			fs.rename(this.path, fspath.join(fspath.dirname(this.path), fspath.basename(req.headers.destination)), next);
+		})
+		// }}}
+		// End {{{
+		.end(function(err) {
+			if (err) return settings.errorHandler(req, res, 400, err);
+			res.sendStatus(200).end();
+		})
+		// }}}
+};
+
 
 module.exports = emu;

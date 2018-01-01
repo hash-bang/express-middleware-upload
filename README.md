@@ -74,3 +74,11 @@ app.use('/api/files/:path?', emu({
 	move: false, // Forbid all renames
 });
 ```
+
+
+Troubleshooting
+---------------
+
+* The API uses `req.params.path` to match the file that operations should be performed on. This means you *must* have that in your file query. So this is right: `app.use('/api/somewhere/:path', ...)` but this wont work: `app.use('/api/somewhere/:file', ...)`
+
+

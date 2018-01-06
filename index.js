@@ -64,10 +64,13 @@ var runMiddleware = function(req, res, middleware, callback, obj) {
 	}
 
 	async()
+		// Call each middleware in sequence until all have been exhausted {{{
 		.limit(1)
 		.forEach(runnable, function(nextMiddleware, middlewareFunc, index) {
 			middlewareFunc.apply(thisContext, [req, res, nextMiddleware]);
 		})
+		// }}}
+		// Either return an error OR satisfy the original callback {{{
 		.end(function(err) {
 			if (err) {
 				res.sendError(403, err);
@@ -75,6 +78,7 @@ var runMiddleware = function(req, res, middleware, callback, obj) {
 				callback();
 			}
 		});
+		// }}}
 };
 // }}}
 

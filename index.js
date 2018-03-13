@@ -53,7 +53,7 @@ var runMiddleware = function(req, res, middleware, callback, obj) {
 	var runnable; // The middleware ARRAY to run
 
 	if (_.isBoolean(middleware) && !middleware) { // Boolean=false - deny!
-		res.status(403).end();
+		return res.status(403).end();
 	} else if (_.isUndefined(middleware) || _.isNull(middleware) || middleware === true) { // Nothing to do anyway
 		return callback();
 	} else if (_.isFunction(middleware)) {

@@ -4,6 +4,7 @@
 * @param {string|function} options.path The path (relative to emu.defaults.basePath) to store files in. Prefix slash is optional but recommended for readability
 * @param {string} [options.basePath] Prefix automatically prepended onto options.path (this is seperate so it can be set globally to your application root via `emu.defaults.basePath`)
 * @param {function} [options.errorHandler] How to output errors. This should be a function called as (req, res, statusCode, message)
+* @param {boolean} [options.escape=true] Automatically escape all filenames so they are URL safe
 * @param {string} [options.postPath='upload'] How to name the uploaded file. 'upload' = Use the uploaded filename appended to options.path, 'param' = Use the path specified in `req.params.path` (implies `options.limit=1`), 'dir' = Use the path as the directory to store the file in and the filename from the uploaded filename
 * @param {string} [options.field='file'] What the multi-part field name is (if omitted all fields will be accepted)
 * @param {number} [options.limit=0] The maximum number of files to accept, set to 0 to accept all
@@ -140,6 +141,7 @@ emu.defaults = {
 	limit: 0,
 	field: 'file',
 	postPath: 'upload',
+	escape: true,
 	errorHandler: function(req, res, code, message) {
 		res.status(code).send(message).end();
 	},
@@ -152,6 +154,7 @@ emu.defaults = {
 * @see emu
 * @param {Object} options An options object using the same standard as the parent middleware
 * @param {string} options.path The storage path to use
+* @param {boolean} [options.escape=true] Whether to escape the filename so its URL safe
 */
 emu.list = function(settings, req, res) {
 	async()
@@ -174,7 +177,7 @@ emu.list = function(settings, req, res) {
 		.map('files', 'files', function(nextFile, path) {
 			fs.stat(fspath.join(settings.path, path), function(err, stat) {
 				nextFile(null, {
-					name: fspath.basename(path),
+					name: _.isUndefined(settings.escape) || settings.escape ? escape(fspath.basename(path)) : fspath.basename(path),
 					ext: fspath.extname(path).toLowerCase().replace(/^\./, ''),
 					size: stat.size,
 					created: stat.ctime, // Technically this should be stat.birthtime but in our case files are immutable so the change time is more valid

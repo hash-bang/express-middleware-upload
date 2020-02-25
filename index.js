@@ -7,6 +7,7 @@
 * @param {boolean} [options.escape=true] Automatically escape all filenames so they are URL safe
 * @param {string} [options.postPath='upload'] How to name the uploaded file. 'upload' = Use the uploaded filename appended to options.path, 'param' = Use the path specified in `req.params.path` (implies `options.limit=1`), 'dir' = Use the path as the directory to store the file in and the filename from the uploaded filename
 * @param {string} [options.field='file'] What the multi-part field name is (if omitted all fields will be accepted)
+* @param {number} [options.expect=0] The minimum number of files to expect, set to 0 to throw no errors
 * @param {number} [options.limit=0] The maximum number of files to accept, set to 0 to accept all
 * @param {function|array|string|boolean} [options.list] Middleware(s) to run before listing files at a given path
 * @param {function|array|string|boolean} [options.get] Middleware(s) to run before reading a specific file
@@ -86,6 +87,7 @@ var runMiddleware = function(req, res, middleware, callback, obj) {
 var emu = function(options) {
 	if (!_.isObject(options)) throw new Error('An options object must be passed to emu');
 	var settings = _.defaults(options, emu.defaults);
+	settings.expect = Math.min(settings.expect, settings.limit);
 
 	if (!settings.path) throw new Error('Cannot use emu without specifying a storage path');
 	if (_.isString(settings.path)) settings.path = fspath.normalize(fspath.join(emu.defaults.basePath, settings.path)); // Neaten up the settings path so its absolute
@@ -138,6 +140,7 @@ var emu = function(options) {
 */
 emu.defaults = {
 	basePath: '',
+	expect: 0,
 	limit: 0,
 	field: 'file',
 	postPath: 'upload',
@@ -250,7 +253,7 @@ emu.post = function(settings, req, res) {
 		// Sanity checks {{{
 		.then(function(next) {
 			if (settings.postPath == 'param') {
-				settings.limit = 1;
+				settings.expect = settings.limit = 1;
 				if (!req.param.path) return next('No filename given in req.params.path');
 			}
 			next();
@@ -263,6 +266,7 @@ emu.post = function(settings, req, res) {
 			if (settings.limit && settings.limit == 1 && settings.field) {
 				multerHandle = multer().single(settings.field);
 			} else if (settings.limit && settings.field) {
+				// FIXME: Not getting expected error back from multer when limit is exceeded.
 				multerHandle = multer().array(settings.field, {maxCount: settings.limit});
 			} else if (settings.field) {
 				multerHandle = multer().array(settings.field);
@@ -270,10 +274,13 @@ emu.post = function(settings, req, res) {
 				multerHandle = multer().any();
 			}
 
+			// FIXME: Should this use `req[settings.field]` instead of `req.file`?
 			multerHandle(req, res, function(err) {
 				if (err) return next(err);
 				if (!req.files && !req.file) return next('No files uploaded');
 				if (req.file) req.files = req.file;
+				if (settings.expect && req.files.length && req.files.length < settings.expect) return next('Less than expected files uploaded');
+				if (settings.limit && req.files.length && req.files.length > settings.limit) return next('More than file limit uploaded');
 				next();
 			});
 		})

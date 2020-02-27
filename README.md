@@ -45,7 +45,8 @@ The following table lists the valid configuration options. The only mandatory se
 | `escape`       | Boolean                                    | `true`     | Automatically escape all filenames so they are URL safe |
 | `postPath`     | String                                     | `'upload'` | How to name the uploaded file. `'upload'` = Use the uploaded filename appended to options.path, `'param'` = Use the path specified in `req.params.path` (implies `options.limit=1`), `'dir'` = Use the path as the directory to store the file in and the filename from the uploaded filename |
 | `field`        | String                                     | `'file'`   | What the multi-part field name is (if falsy, all fields will be accepted - this is not recommended) |
-| `limit`        | Number                                     | `0`        | The maximum number of files to accept, set to 0 for no limit |
+| `expect`        | Number                                     | `0`        | The minimum number of files to expect, set to 0 for no minimum |
+| `limit`        | Number                                     | `0`        | The maximum number of files to accept, set to 0 for no maximum |
 | `list`         | Function, Array, String, Boolean           |            | Middleware(s) to run before listing files at a given path. See below for comments. |
 | `get`          | Function, Array, String, Boolean           |            | Middleware(s) to run before reading a specific file. See below for comments. |
 | `post`         | Function, Array, String, Boolean           |            | Middleware(s) to run before accepting an file upload. See below for comments. |
